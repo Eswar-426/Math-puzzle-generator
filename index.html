@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Math App</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f9ff3c 0%, #2ebf91 100%);
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* ---------- LOGIN/SIGNUP PAGE ---------- */
+    .auth-page {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      width: 350px;
+    }
+
+    h2 { color: #2ebf91; }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #ffdd00;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #f4c200;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #toggle-auth {
+      margin-top: 15px;
+      color: #000;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    #error-message { color: red; margin-top: 10px; }
+
+    /* ---------- APP PAGE ---------- */
+    #app-page {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      color: #000;
+    }
+
+    header {
+      background: linear-gradient(135deg, #ffdd00 0%, #2ebf91 100%);
+      color: white;
+      text-align: center;
+      padding: 1.2rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #welcome-user {
+      font-size: 1rem;
+      margin-top: 5px;
+      color: #fff;
+    }
+
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    section {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(15px);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      margin-bottom: 25px;
+    }
+
+    #progress-bar-container {
+      width: 100%;
+      background-color: #ddd;
+      height: 25px;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(135deg, #ffdd00, #2ebf91);
+      transition: width 0.5s ease;
+    }
+
+    #feedback {
+      font-size: 1.2rem;
+      margin-top: 15px;
+      color: #ff6b6b;
+    }
+
+    footer {
+      background: rgba(255, 255, 255, 0.2);
+      color: #000;
+      text-align: center;
+      padding: 10px;
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0; top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: scale-up 0.3s ease-out;
+    }
+
+    @keyframes scale-up {
+      from { transform: scale(0.7); }
+      to { transform: scale(1); }
+    }
+
+    .close { float: right; font-size: 24px; cursor: pointer; }
+    #show-answer-btn { background-color: #2ebf91; color: #fff; margin-left: 10px; }
+    #show-answer-btn:hover { background-color: #27ae60; }
+
+    /* ---------- LEADERBOARD ---------- */
+    #leaderboard {
+      text-align: left;
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.3);
+      padding: 15px;
+      border-radius: 10px;
+    }
+    #leaderboard h3 {
+      color: #2ebf91;
+    }
+    ol {
+      padding-left: 25px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- AUTH PAGE -->
+  <div id="auth-page" class="auth-page">
+    <h2 id="auth-title">🔐 Sign In</h2>
+    <input type="text" id="auth-username" placeholder="Enter username" required>
+    <input type="password" id="auth-password" placeholder="Enter password" required>
+    <button id="auth-btn">Sign In</button>
+    <p id="error-message"></p>
+    <p id="toggle-auth">Don't have an account? Sign Up</p>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app-page">
+    <header>
+      <h1>Interactive Math App</h1>
+      <p id="welcome-user"></p>
+    </header>
+
+    <main>
+      <section>
+        <h2 id="level-indicator">Level 1</h2>
+        <div id="progress-bar-container"><div id="progress-bar"></div></div>
+        <div id="problem-container"></div>
+        <input type="text" id="answer" placeholder="Enter your answer">
+        <div>
+          <button id="submit-button">Submit</button>
+          <button id="show-answer-btn">Show Answer</button>
+        </div>
+        <div id="feedback"></div>
+      </section>
+
+      <section id="leaderboard">
+        <h3>🏆 Leaderboard (Top 5 Scores)</h3>
+        <ol id="leaderboard-list"></ol>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 MathMind. All rights reserved.</p>
+    </footer>
+
+    <div id="level-up-modal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="close-modal">&times;</span>
+        <h2>🎉 Level Up!</h2>
+        <p>Congratulations! You've reached <span id="new-level"></span>!</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== AUTHENTICATION ==========
+    const authTitle = document.getElementById("auth-title");
+    const authBtn = document.getElementById("auth-btn");
+    const toggleAuth = document.getElementById("toggle-auth");
+    const errorMsg = document.getElementById("error-message");
+    const authPage = document.getElementById("auth-page");
+    const appPage = document.getElementById("app-page");
+    const welcomeUser = document.getElementById("welcome-user");
+    let isSignUp = false;
+
+    toggleAuth.addEventListener("click", () => {
+      isSignUp = !isSignUp;
+      if (isSignUp) {
+        authTitle.textContent = "📝 Sign Up";
+        authBtn.textContent = "Sign Up";
+        toggleAuth.textContent = "Already have an account? Sign In";
+      } else {
+        authTitle.textContent = "🔐 Sign In";
+        authBtn.textContent = "Sign In";
+        toggleAuth.textContent = "Don't have an account? Sign Up";
+      }
+      errorMsg.textContent = "";
+    });
+
+    authBtn.addEventListener("click", () => {
+      const username = document.getElementById("auth-username").value.trim();
+      const password = document.getElementById("auth-password").value.trim();
+      if (!username || !password) {
+        errorMsg.textContent = "Please fill all fields!";
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem("users")) || {};
+
+      if (isSignUp) {
+        if (users[username]) {
+          errorMsg.textContent = "User already exists!";
+          return;
+        }
+        users[username] = password;
+        localStorage.setItem("users", JSON.stringify(users));
+        alert("Sign Up successful! Please Sign In now.");
+        isSignUp = false;
+        authTitle.textContent = "🔐 Sign In";
+        authBtn.textContent = "Sign In";
+        toggleAuth.textContent = "Don't have an account? Sign Up";
+      } else {
+        if (users[username] === password) {
+          authPage.style.display = "none";
+          appPage.style.display = "block";
+          localStorage.setItem("mathUser", username);
+          welcomeUser.textContent = `Welcome, ${username}! Ready to challenge your brain 🧠`;
+          startGame();
+        } else {
+          errorMsg.textContent = "Invalid credentials!";
+        }
+      }
+    });
+
+    // ========== GAME LOGIC ==========
+    let level = 1, progress = 0, incorrectAttempts = 0, score = 0;
+    const progressBar = document.getElementById('progress-bar');
+    const levelIndicator = document.getElementById('level-indicator');
+    const levelUpModal = document.getElementById('level-up-modal');
+    const closeModal = document.getElementById('close-modal');
+    const problemContainer = document.getElementById('problem-container');
+    const answerInput = document.getElementById('answer');
+    const feedback = document.getElementById('feedback');
+    const newLevelDisplay = document.getElementById('new-level');
+    const showAnswerBtn = document.getElementById('show-answer-btn');
+    const leaderboardList = document.getElementById('leaderboard-list');
+    let currentProblem = {};
+
+    function generateProblem() {
+      const operations = ['+', '-', '*', '/'];
+      const num1 = Math.floor(Math.random() * (level * 10)) + 1;
+      const num2 = Math.floor(Math.random() * (level * 10)) + 1;
+      const operation = operations[Math.floor(Math.random() * operations.length)];
+      let text = `${num1} ${operation} ${num2}`;
+      let solution = (operation === '/') ? num1 : eval(text);
+      problemContainer.textContent = `Solve: ${text}`;
+      return { text, solution };
+    }
+
+    function checkAnswer() {
+      const userAnswer = parseFloat(answerInput.value);
+      if (userAnswer === currentProblem.solution) {
+        feedback.textContent = "✅ Correct!";
+        feedback.style.color = "green";
+        updateProgress();
+        score += 10;
+        incorrectAttempts = 0;
+      } else {
+        incorrectAttempts++;
+        feedback.textContent = `❌ Incorrect! Attempts left: ${2 - incorrectAttempts}`;
+        feedback.style.color = "red";
+        if (incorrectAttempts >= 2) {
+          feedback.textContent = `❌ The correct answer was ${currentProblem.solution}`;
+          incorrectAttempts = 0;
+          updateProgress(true);
+        }
+      }
+      answerInput.value = '';
+      currentProblem = generateProblem();
+    }
+
+    function updateProgress(reset = false) {
+      progress = reset ? Math.max(progress - 10, 0) : progress + 10;
+      if (progress >= 100) {
+        levelUp();
+        progress = 0;
+      }
+      progressBar.style.width = progress + '%';
+    }
+
+    function levelUp() {
+      level++;
+      levelIndicator.textContent = 'Level ' + level;
+      newLevelDisplay.textContent = `Level ${level}`;
+      levelUpModal.style.display = 'flex';
+      setTimeout(() => { levelUpModal.style.display = 'none'; }, 2000);
+      updateLeaderboard();
+    }
+
+    closeModal.addEventListener('click', () => { levelUpModal.style.display = 'none'; });
+
+    document.getElementById('submit-button').addEventListener('click', checkAnswer);
+    answerInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+    showAnswerBtn.addEventListener('click', () => {
+      feedback.textContent = `💡 Correct Answer: ${currentProblem.solution}`;
+      feedback.style.color = "#2c3e50";
+    });
+
+    function startGame() { currentProblem = generateProblem(); loadLeaderboard(); }
+
+    // ========== LEADERBOARD ==========
+    function updateLeaderboard() {
+      let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      const user = localStorage.getItem("mathUser");
+      leaderboard.push({ user, score });
+      leaderboard.sort((a, b) => b.score - a.score);
+      leaderboard = leaderboard.slice(0, 5);
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+      loadLeaderboard();
+    }
+
+    function loadLeaderboard() {
+      leaderboardList.innerHTML = "";
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      leaderboard.forEach(entry => {
+        const li = document.createElement("li");
+        li.textContent = `${entry.user} — ${entry.score} pts`;
+        leaderboardList.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
